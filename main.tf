@@ -29,7 +29,8 @@ resource "local_file" "cluster_private_key_pem" {
 terraform {
   required_providers {
     equinix = {
-      source = "equinix/equinix"
+      source  = "equinix/equinix"
+      version = "1.25.1"
     }
     pnap = {
       source = "phoenixnap/pnap"
