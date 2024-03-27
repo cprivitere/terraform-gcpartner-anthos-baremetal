@@ -37,8 +37,14 @@ terraform {
   }
 }
 
+locals {
+  gcp_zone_parts = split("-", var.gcp_zone)
+  gcp_region     = join("-", slice(local.gcp_zone_parts, 0, length(local.gcp_zone_parts) - 1))
+}
+
 provider "google" {
   project = var.gcp_project_id
+  region  = local.gcp_region
 }
 
 provider "equinix" {
@@ -112,6 +118,8 @@ module "EQM_Infra" {
   private_subnet           = var.private_subnet
   ssh_key                  = local.ssh_key
   metal_lb_vip_subnet_size = var.metal_lb_vip_subnet_size
+  gcp_project_id           = var.gcp_project_id
+  gcp_zone                 = var.gcp_zone
 }
 
 locals {
@@ -126,6 +134,7 @@ locals {
   eqm_pub_vlan_id  = var.cloud == "EQM" ? "not_implemented" : ""
   eqm_pub_subnet   = var.cloud == "EQM" ? module.EQM_Infra.0.lb_vip_subnet : ""
   eqm_os_image     = var.cloud == "EQM" ? module.EQM_Infra.0.os_image : ""
+  eqm_project_id   = var.cloud == "EQM" ? module.EQM_Infra.0.project_id : ""
 
   gcp_ip           = var.cloud == "GCP" ? module.GCP_Infra.0.bastion_ip : ""
   gcp_user         = var.cloud == "GCP" ? module.GCP_Infra.0.username : ""
@@ -189,7 +198,7 @@ module "Ansible_Bootstrap" {
   ansible_tar_ball         = var.ansible_tar_ball
   ansible_url              = var.ansible_url
   metal_auth_token         = var.metal_auth_token
-  metal_project_id         = var.metal_project_id
+  metal_project_id         = local.eqm_project_id
 }
 
 locals {
@@ -208,4 +217,3 @@ data "external" "kubeconfig" {
     "jq -n --arg content \"$(${local.ssh_command} cat ${local.remote_kubeconfig_path})\" '{$content}'",
   ]
 }
-

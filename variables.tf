@@ -148,7 +148,7 @@ variable "gcp_worker_instance_type" {
 
 variable "gcp_zone" {
   type        = string
-  default     = "us-central1-a"
+  default     = "us-east4-a"
   description = "The GCE zone where the instances should reside"
 }
 

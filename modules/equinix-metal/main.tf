@@ -6,6 +6,11 @@ terraform {
   }
 }
 
+locals {
+  metal_project_id = var.create_project ? equinix_metal_project.new_project[0].id : var.project_id
+  username         = "root"
+}
+
 resource "equinix_metal_project" "new_project" {
   count           = var.create_project ? 1 : 0
   name            = var.project_name
@@ -14,11 +19,6 @@ resource "equinix_metal_project" "new_project" {
     deployment_type = "local"
     asn             = 65000
   }
-}
-
-locals {
-  metal_project_id = var.create_project ? equinix_metal_project.new_project[0].id : var.project_id
-  username         = "root"
 }
 
 resource "equinix_metal_project_ssh_key" "ssh_pub_key" {
@@ -33,7 +33,7 @@ resource "equinix_metal_device" "cp_node" {
   ]
   count            = var.cp_node_count
   hostname         = format("%s-cp-%02d", var.cluster_name, count.index + 1)
-  plan             = var.metal_worker_plan
+  plan             = var.metal_cp_plan
   metro            = var.metal_metro
   operating_system = var.operating_system
   billing_cycle    = var.metal_billing_cycle

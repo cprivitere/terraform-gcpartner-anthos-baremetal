@@ -42,3 +42,8 @@ output "lb_vip_id" {
   value       = equinix_metal_reserved_ip_block.lb_vip_subnet.id
   description = "The load balancer VIP network id"
 }
+
+output "project_id" {
+  value       = local.metal_project_id
+  description = "Equinix Metal project ID"
+}
