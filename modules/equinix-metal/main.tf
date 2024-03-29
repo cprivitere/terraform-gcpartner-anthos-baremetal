@@ -6,6 +6,28 @@ terraform {
   }
 }
 
+module "equinix-fabric-connection-gcp" {
+  source = "/home/cprivitere/cprivitere-stuff/terraform-equinix-fabric-connection-gcp"
+  #version = "0.3.0"
+
+  # required variables
+  fabric_notification_users     = ["cprivitere@equinix.com"]
+  fabric_destination_metro_code = upper(var.metal_metro)
+  fabric_speed                  = "50"
+  fabric_service_token_id       = equinix_metal_connection.example.service_tokens.0.id
+
+  # gcp_project = var.gcp_project_name // if unspecified, the project configured in the provided block will be used
+  gcp_availability_domain = 1
+
+  gcp_gcloud_skip_download = true
+  platform                 = "linux"
+
+  gcp_region = "us-east4"
+  ## BGP config
+  gcp_configure_bgp = true
+  # gcp_interconnect_customer_asn = // If unspecified, default value "65000" will be used
+}
+
 resource "equinix_metal_project" "new_project" {
   count           = var.create_project ? 1 : 0
   name            = var.project_name
@@ -88,4 +110,48 @@ resource "equinix_metal_reserved_ip_block" "lb_vip_subnet" {
   quantity    = var.metal_lb_vip_subnet_size
   description = "${var.cluster_name}: Load Balancer VIPs 01"
   tags        = ["cluster:${var.cluster_name}", "created_by:terraform", "created_at:${timestamp()}"]
+}
+
+# Create a new VLAN in metro "esv"
+resource "equinix_metal_vlan" "vlan1" {
+  description = "Gcloud VLAN"
+  metro       = var.metal_metro
+  project_id  = local.metal_project_id
+  vxlan       = 1040
+}
+
+resource "equinix_metal_vrf" "example" {
+  description = "VRF with ASN 65000 and a pool of address space that includes 192.168.100.0/25"
+  name        = "example-vrf"
+  metro       = var.metal_metro
+  local_asn   = "65000"
+  ip_ranges   = ["192.168.100.0/25", "192.168.200.0/25", "169.254.140.64/29"]
+  project_id  = local.metal_project_id
+}
+resource "equinix_metal_reserved_ip_block" "example" {
+  description = "Reserved IP block (192.168.100.0/29) taken from on of the ranges in the VRF's pool of address space."
+  project_id  = local.metal_project_id
+  metro       = var.metal_metro
+  type        = "vrf"
+  vrf_id      = equinix_metal_vrf.example.id
+  cidr        = 29
+  network     = "192.168.100.0"
+}
+
+resource "equinix_metal_gateway" "example" {
+  project_id        = local.metal_project_id
+  vlan_id           = equinix_metal_vlan.vlan1.id
+  ip_reservation_id = equinix_metal_reserved_ip_block.example.id
+}
+
+
+resource "equinix_metal_connection" "example" {
+  name               = "tf-metal-to-google"
+  project_id         = local.metal_project_id
+  type               = "shared"
+  redundancy         = "primary"
+  metro              = var.metal_metro
+  speed              = "50Mbps"
+  service_token_type = "a_side"
+  vrfs               = [equinix_metal_vrf.example.id]
 }

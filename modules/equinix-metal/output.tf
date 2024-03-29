@@ -42,3 +42,8 @@ output "lb_vip_id" {
   value       = equinix_metal_reserved_ip_block.lb_vip_subnet.id
   description = "The load balancer VIP network id"
 }
+
+output "vlan_id" {
+  value       = equinix_metal_vlan.vlan1.vxlan
+  description = "vlan id"
+}

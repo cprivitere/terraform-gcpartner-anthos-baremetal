@@ -29,8 +29,7 @@ resource "local_file" "cluster_private_key_pem" {
 terraform {
   required_providers {
     equinix = {
-      source  = "equinix/equinix"
-      version = "1.25.1"
+      source = "equinix/equinix"
     }
     pnap = {
       source = "phoenixnap/pnap"
@@ -43,7 +42,9 @@ provider "google" {
 }
 
 provider "equinix" {
-  auth_token = var.metal_auth_token
+  auth_token    = var.metal_auth_token
+  client_id     = var.client_id
+  client_secret = var.client_secret
 }
 
 provider "pnap" {
@@ -113,6 +114,8 @@ module "EQM_Infra" {
   private_subnet           = var.private_subnet
   ssh_key                  = local.ssh_key
   metal_lb_vip_subnet_size = var.metal_lb_vip_subnet_size
+  gcp_project_id           = var.gcp_project_id
+  gcp_zone                 = var.gcp_zone
 }
 
 locals {
@@ -124,7 +127,7 @@ locals {
   eqm_priv_vlan_id = var.cloud == "EQM" ? "not_implemented" : ""
   eqm_priv_subnet  = var.cloud == "EQM" ? "not_implemented" : ""
   eqm_pub_net_id   = var.cloud == "EQM" ? module.EQM_Infra.0.lb_vip_id : ""
-  eqm_pub_vlan_id  = var.cloud == "EQM" ? "not_implemented" : ""
+  eqm_pub_vlan_id  = var.cloud == "EQM" ? module.EQM_Infra.0.vlan_id : ""
   eqm_pub_subnet   = var.cloud == "EQM" ? module.EQM_Infra.0.lb_vip_subnet : ""
   eqm_os_image     = var.cloud == "EQM" ? module.EQM_Infra.0.os_image : ""
 
