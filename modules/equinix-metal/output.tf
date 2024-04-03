@@ -47,3 +47,8 @@ output "vlan_id" {
   value       = equinix_metal_vlan.vlan1.vxlan
   description = "vlan id"
 }
+
+output "project_id" {
+  value       = local.metal_project_id
+  description = "Equinix Metal project ID"
+}
