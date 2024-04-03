@@ -27,7 +27,7 @@ locals {
 }
 
 module "equinix-fabric-connection-gcp" {
-  source = "/Users/ctreatman/Documents/code/terraform-equinix-fabric-connection-gcp"
+  source = "github.com/equinix-labs/terraform-equinix-fabric-connection-gcp?ref=cprivitere-patch-outputs"
 
   # required variables
   fabric_notification_users     = ["cprivitere@equinix.com"]
@@ -118,17 +118,12 @@ resource "equinix_metal_device" "cp_node" {
   }
 }
 
-resource "equinix_metal_device_network_type" "cp_node" {
+resource "equinix_metal_port" "cp_node_bond0" {
   count     = var.cp_node_count
-  device_id = equinix_metal_device.cp_node[count.index].id
-  type      = "hybrid"
-}
-
-resource "equinix_metal_port_vlan_attachment" "cp_node" {
-  count     = var.cp_node_count
-  device_id = equinix_metal_device_network_type.cp_node[count.index].id
-  vlan_vnid = equinix_metal_vlan.vlan1.vxlan
-  port_name = "eth1"
+  port_id = [for p in equinix_metal_device.cp_node[count.index].ports : p.id if p.name == "bond0"][0]
+  layer2  = false
+  bonded  = true
+  vlan_ids = [equinix_metal_vlan.vlan1.id]
 }
 
 resource "equinix_metal_device" "worker_node" {
@@ -162,17 +157,12 @@ resource "equinix_metal_device" "worker_node" {
   }
 }
 
-resource "equinix_metal_device_network_type" "worker_node" {
+resource "equinix_metal_port" "worker_node_bond0" {
   count     = var.worker_node_count
-  device_id = equinix_metal_device.worker_node[count.index].id
-  type      = "hybrid"
-}
-
-resource "equinix_metal_port_vlan_attachment" "worker_node" {
-  count     = var.worker_node_count
-  device_id = equinix_metal_device_network_type.worker_node[count.index].id
-  vlan_vnid = equinix_metal_vlan.vlan1.vxlan
-  port_name = "eth1"
+  port_id = [for p in equinix_metal_device.worker_node[count.index].ports : p.id if p.name == "bond0"][0]
+  layer2  = false
+  bonded  = true
+  vlan_ids = [equinix_metal_vlan.vlan1.id]
 }
 
 resource "equinix_metal_bgp_session" "enable_cp_bgp" {
@@ -205,26 +195,26 @@ resource "equinix_metal_vlan" "vlan1" {
 }
 
 resource "equinix_metal_vrf" "example" {
-  description = "VRF with ASN 65000 and a pool of address space that includes 192.168.100.0/28"
+  description = "VRF with ASN 65000 and a pool of address space that includes 192.168.100.0/25"
   name        = "example-vrf"
   metro       = var.metal_metro
   local_asn   = "65000"
-  ip_ranges   = ["192.168.100.0/28"]
+  ip_ranges   = ["192.168.100.0/25"]
   project_id  = local.metal_project_id
 
   # Since we have to jam in the Google-provided IP range with a restapi resource,
   # we have to ignore changes to IP ranges in the resource itself
-  #lifecycle {
-  #  ignore_changes = [ip_ranges]
-  #}
+  lifecycle {
+    ignore_changes = [ip_ranges]
+  }
 }
 resource "equinix_metal_reserved_ip_block" "example" {
-  description = "Reserved IP block (192.168.100.0/28) taken from on of the ranges in the VRF's pool of address space."
+  description = "Reserved IP block (192.168.100.0/25) taken from on of the ranges in the VRF's pool of address space."
   project_id  = local.metal_project_id
   metro       = var.metal_metro
   type        = "vrf"
   vrf_id      = equinix_metal_vrf.example.id
-  cidr        = 28
+  cidr        = 25
   network     = "192.168.100.0"
 }
 
