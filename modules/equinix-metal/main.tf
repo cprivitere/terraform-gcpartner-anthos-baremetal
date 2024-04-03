@@ -93,7 +93,7 @@ resource "equinix_metal_device" "cp_node" {
   ]
   count            = var.cp_node_count
   hostname         = format("%s-cp-%02d", var.cluster_name, count.index + 1)
-  plan             = var.metal_worker_plan
+  plan             = var.metal_cp_plan
   metro            = var.metal_metro
   operating_system = var.operating_system
   billing_cycle    = var.metal_billing_cycle
