@@ -24,7 +24,7 @@ module "equinix-fabric-connection-gcp" {
   gcp_gcloud_skip_download = true
   platform                 = "darwin"
 
-  gcp_region = "us-east4"
+  gcp_region = trim(var.gcp_zone, "-a")
   ## BGP config
   gcp_configure_bgp = true
   # gcp_interconnect_customer_asn = // If unspecified, default value "65000" will be used
@@ -73,7 +73,7 @@ resource "equinix_metal_device" "cp_node" {
 }
 
 resource "equinix_metal_port_vlan_attachment" "cp_node" {
-  count            = var.cp_node_count
+  count     = var.cp_node_count
   device_id = equinix_metal_device.cp_node[count.index].id
   vlan_vnid = equinix_metal_vlan.vlan1.vxlan
   port_name = "eth1"
@@ -101,7 +101,7 @@ resource "equinix_metal_device" "worker_node" {
 }
 
 resource "equinix_metal_port_vlan_attachment" "worker_node" {
-  count            = var.worker_node_count
+  count     = var.worker_node_count
   device_id = equinix_metal_device.worker_node[count.index].id
   vlan_vnid = equinix_metal_vlan.vlan1.vxlan
   port_name = "eth1"
@@ -142,22 +142,22 @@ resource "equinix_metal_vrf" "example" {
   local_asn   = "65000"
   # TODO: 169.254.... address should be read from somewhere instead of hard-coded? But that leads to a cycle
   #ip_ranges   = ["192.168.100.0/25", "192.168.200.0/25", "169.254.140.64/29", module.equinix-fabric-connection-gcp.gcp_customer_router_ip_address]
-  ip_ranges   = ["192.168.100.0/25", "192.168.200.0/25", "169.254.140.64/29"]
-  project_id  = local.metal_project_id
-  
+  ip_ranges  = ["192.168.100.0/25", "192.168.200.0/25", "169.254.140.64/29"]
+  project_id = local.metal_project_id
+
   # Since we have to jam in the Google-provided IP range with a restapi resource,
   # we have to ignore changes to IP ranges in the resource itself
   lifecycle {
-    ignore_changes = [ ip_ranges ]
+    ignore_changes = [ip_ranges]
   }
 }
 resource "equinix_metal_reserved_ip_block" "example" {
-  description = "Reserved IP block (192.168.100.0/29) taken from on of the ranges in the VRF's pool of address space."
+  description = "Reserved IP block (192.168.100.0/28) taken from on of the ranges in the VRF's pool of address space."
   project_id  = local.metal_project_id
   metro       = var.metal_metro
   type        = "vrf"
   vrf_id      = equinix_metal_vrf.example.id
-  cidr        = 29
+  cidr        = 28
   network     = "192.168.100.0"
 }
 
@@ -181,7 +181,7 @@ resource "equinix_metal_connection" "example" {
 }
 
 locals {
-  metal_side_ip = split("/", module.equinix-fabric-connection-gcp.gcp_customer_router_ip_address)[0]
+  metal_side_ip  = split("/", module.equinix-fabric-connection-gcp.gcp_customer_router_ip_address)[0]
   google_side_ip = split("/", module.equinix-fabric-connection-gcp.gcp_cloud_router_ip_address)[0]
 
   // I think this should be fairly safe because these IPs are automatically
@@ -200,10 +200,10 @@ resource "restapi_object" "vrf_metal_to_gcp_ip_range" {
 }
 
 resource "restapi_object" "vrf_vc_bgp_peering" {
-  depends_on = [ restapi_object.vrf_metal_to_gcp_ip_range ]
+  depends_on = [restapi_object.vrf_metal_to_gcp_ip_range]
   # We made a non-redundant connection so we can assume there's one port with one VC
   path = "/virtual-circuits/${equinix_metal_connection.example.ports[0].virtual_circuit_ids[0]}"
-  
+
   # Virtual Circuits on a shared connection are API-managed,
   # so we want to `PUT` an update to the existing circuit
   # even  though we're "creating" the resource from the
@@ -213,8 +213,8 @@ resource "restapi_object" "vrf_vc_bgp_peering" {
   # TODO
   data = jsonencode({
     customer_ip = local.google_side_ip
-    metal_ip = local.metal_side_ip
-    peer_asn = 16550
-    subnet = "${local.lowest_ip}/30"
+    metal_ip    = local.metal_side_ip
+    peer_asn    = 16550
+    subnet      = "${local.lowest_ip}/30"
   })
 }
