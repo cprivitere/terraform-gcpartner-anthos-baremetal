@@ -56,7 +56,7 @@ module "equinix-fabric-connection-gcp" {
 
 
 resource "google_compute_router" "abm" {
-  name    = "abm-router"
+  name    = "${var.cluster_name}-router"
   network = google_compute_network.abm.name
   region  = local.gcp_region
 
@@ -119,10 +119,10 @@ resource "equinix_metal_device" "cp_node" {
 }
 
 resource "equinix_metal_port" "cp_node_bond0" {
-  count     = var.cp_node_count
-  port_id = [for p in equinix_metal_device.cp_node[count.index].ports : p.id if p.name == "bond0"][0]
-  layer2  = false
-  bonded  = true
+  count    = var.cp_node_count
+  port_id  = [for p in equinix_metal_device.cp_node[count.index].ports : p.id if p.name == "bond0"][0]
+  layer2   = false
+  bonded   = true
   vlan_ids = [equinix_metal_vlan.vlan1.id]
 }
 
@@ -158,10 +158,10 @@ resource "equinix_metal_device" "worker_node" {
 }
 
 resource "equinix_metal_port" "worker_node_bond0" {
-  count     = var.worker_node_count
-  port_id = [for p in equinix_metal_device.worker_node[count.index].ports : p.id if p.name == "bond0"][0]
-  layer2  = false
-  bonded  = true
+  count    = var.worker_node_count
+  port_id  = [for p in equinix_metal_device.worker_node[count.index].ports : p.id if p.name == "bond0"][0]
+  layer2   = false
+  bonded   = true
   vlan_ids = [equinix_metal_vlan.vlan1.id]
 }
 
@@ -267,7 +267,7 @@ resource "restapi_object" "vrf_vc_bgp_peering" {
 }
 
 resource "google_compute_network" "abm" {
-  name = "abm-network"
+  name = "${var.cluster_name}-network"
 }
 
 data "google_compute_subnetwork" "abm" {
@@ -276,7 +276,7 @@ data "google_compute_subnetwork" "abm" {
 }
 
 resource "google_dns_managed_zone" "private-zone" {
-  name        = "private-zone"
+  name        = "${var.cluster_name}-private-zone"
   dns_name    = "googleapis.com."
   description = "DNS zone for Google Private Access"
 
@@ -308,7 +308,7 @@ resource "google_dns_record_set" "cname" {
 }
 
 resource "google_dns_policy" "inbound_dns" {
-  name                      = "inbound-dns-policy"
+  name                      = "${var.cluster_name}-inbound-dns-policy"
   enable_inbound_forwarding = true
 
   networks {
