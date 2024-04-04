@@ -2,7 +2,7 @@
 
 ## Install git if you don't have it already
 
-    https://git-scm.com/book/en/v2/Getting-Started-Installing-Git
+https://git-scm.com/book/en/v2/Getting-Started-Installing-Git
 
     ```sh
     git clone https://github.com/cprivitere/terraform-gcpartner-anthos-baremetal
@@ -22,7 +22,7 @@
 
 ## Install kubectl if you don't have it already
 
-    https://kubernetes.io/docs/tasks/tools/
+https://kubernetes.io/docs/tasks/tools/
 
 ## Validate the cluster is working
 
@@ -34,7 +34,7 @@
 
 ## Install Helm if you don't have it already
 
-    https://helm.sh/docs/intro/install/
+https://helm.sh/docs/intro/install/
 
     ```sh
     git clone https://github.com/open-webui/open-webui/
