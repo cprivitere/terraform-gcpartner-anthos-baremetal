@@ -34,9 +34,6 @@ terraform {
     pnap = {
       source = "phoenixnap/pnap"
     }
-    restapi = {
-      source = "Mastercard/restapi"
-    }
   }
 }
 
@@ -219,18 +216,4 @@ data "external" "kubeconfig" {
     "-c",
     "jq -n --arg content \"$(${local.ssh_command} cat ${local.remote_kubeconfig_path})\" '{$content}'",
   ]
-}
-
-
-# Provider definition cannot be in nested module
-# because nested module uses `count`
-provider "restapi" {
-  uri                  = "https://api.equinix.com/metal/v1"
-  write_returns_object = true
-  debug                = true
-
-  headers = {
-    "X-Auth-Token" = var.metal_auth_token,
-    "Content-Type" = "application/json"
-  }
 }

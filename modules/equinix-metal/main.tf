@@ -33,7 +33,7 @@ resource "equinix_metal_device" "cp_node" {
   ]
   count            = var.cp_node_count
   hostname         = format("%s-cp-%02d", var.cluster_name, count.index + 1)
-  plan             = var.metal_worker_plan
+  plan             = var.metal_cp_plan
   metro            = var.metal_metro
   operating_system = var.operating_system
   billing_cycle    = var.metal_billing_cycle
@@ -67,6 +67,18 @@ resource "equinix_metal_device" "worker_node" {
   ip_address {
     type = "public_ipv4"
   }
+}
+
+resource "equinix_metal_bgp_session" "enable_cp_bgp" {
+  count          = var.cp_node_count
+  device_id      = element(equinix_metal_device.cp_node.*.id, count.index)
+  address_family = "ipv4"
+}
+
+resource "equinix_metal_bgp_session" "enable_worker_bgp" {
+  count          = var.worker_node_count
+  device_id      = element(equinix_metal_device.worker_node.*.id, count.index)
+  address_family = "ipv4"
 }
 
 resource "equinix_metal_reserved_ip_block" "lb_vip_subnet" {
