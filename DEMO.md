@@ -6,9 +6,20 @@ https://git-scm.com/book/en/v2/Getting-Started-Installing-Git
 
 ```sh
 git clone https://github.com/cprivitere/terraform-gcpartner-anthos-baremetal
+```
+
+- Install Terraform if you don't have it already
+
+https://developer.hashicorp.com/terraform/tutorials/gcp-get-started/install-cli
+
+```sh
 cd terraform-gcpartner-anthos-baremetal
 terraform init -upgrade
 ```
+
+- Install Gcloud CLI if you dont' have it already
+
+https://cloud.google.com/sdk/docs/install
 
 - do a gcloud init and set it up to connect your GCP project
 - Edit the terraform.tfvars file to have your API key and Project ID
