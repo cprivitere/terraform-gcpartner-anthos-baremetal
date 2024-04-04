@@ -55,7 +55,7 @@ variable "worker_node_count" {
 variable "network_type" {
   type        = string
   default     = "public"
-  description = "Deploy the nodes on a 'private' or 'public' network. (Only supported in PNAP today)"
+  description = "Deploy the nodes on a 'private' or 'public' network. (Only supported in PNAP today)."
 }
 
 variable "create_network" {
@@ -77,10 +77,11 @@ variable "private_network_id" {
 }
 
 # Ansible Vars
+# TODO: It looks like ansible_playbook_version is not used... It would be nice to just use tag:v1.2.3 or branch:BranchName and make the right choice for which .tar.gz to grab
 variable "ansible_playbook_version" {
   type        = string
   description = "The version of the ansible playbook to install"
-  default     = "v1.0.3"
+  default     = "v1.14.2-001"
 }
 
 variable "ansible_url" {
@@ -147,7 +148,7 @@ variable "gcp_worker_instance_type" {
 
 variable "gcp_zone" {
   type        = string
-  default     = "us-central1-a"
+  default     = "us-east4-a"
   description = "The GCE zone where the instances should reside"
 }
 
@@ -170,9 +171,9 @@ variable "metal_project_id" {
   description = "The project ID to use for EQM"
 }
 
-variable "metal_facility" {
+variable "metal_metro" {
   type        = string
-  default     = "ny5"
+  default     = "ny"
   description = "Equinix Metal Facility to deploy into"
 }
 
@@ -192,4 +193,10 @@ variable "metal_billing_cycle" {
   type        = string
   default     = "hourly"
   description = "How the node will be billed (Not usually changed)"
+}
+
+variable "metal_lb_vip_subnet_size" {
+  type        = number
+  description = "The number of IPs to have for Load Balancer VIPs (2 are used for Control Plane and Ingress VIPs)"
+  default     = 8
 }

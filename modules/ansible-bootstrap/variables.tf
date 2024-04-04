@@ -6,6 +6,11 @@ variable "ssh_key" {
   description = "SSH Public and Private Key"
 }
 
+variable "cloud" {
+  type        = string
+  description = "GCP (Google Cloud Platform), EQM (Equinx Metal), or PNAP (Phoenix Nap) to deploy the 'Nodes'"
+}
+
 variable "bastion_ip" {
   type        = string
   description = "The bastion host/admin workstation public IP Address"
@@ -31,9 +36,9 @@ variable "worker_ips" {
   description = "ips for worker nodes"
 }
 
-variable "server_subnet" {
+variable "load_balancer_subnet" {
   type        = string
-  description = "The IP space for the cluster"
+  description = "The IP space for the load balancers"
 }
 
 variable "cluster_name" {
@@ -75,4 +80,14 @@ variable "gcp_sa_keys" {
 variable "gcp_project_id" {
   type        = string
   description = "The project ID to use (Same variable for GCP and EQM)"
+}
+
+variable "metal_project_id" {
+  type        = string
+  description = "The project ID to use for EQM"
+}
+
+variable "metal_auth_token" {
+  type        = string
+  description = "Equinix Metal API Key"
 }

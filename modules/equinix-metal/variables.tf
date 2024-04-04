@@ -5,7 +5,6 @@ variable "metal_auth_token" {
 
 variable "metal_organization_id" {
   type        = string
-  default     = "null"
   description = "Equinix Metal Organization ID"
 }
 
@@ -16,13 +15,11 @@ variable "create_project" {
 
 variable "project_name" {
   type        = string
-  default     = "null"
   description = "The name of the project if 'create_project' is 'true'."
 }
 
 variable "project_id" {
   type        = string
-  default     = "null"
   description = "The project ID to use, if not creating a new one"
 }
 
@@ -46,9 +43,8 @@ variable "metal_worker_plan" {
   description = "Equinix Metal device type to deploy"
 }
 
-variable "metal_facility" {
+variable "metal_metro" {
   type        = string
-  default     = "ny5"
   description = "Equinix Metal Facility to deploy into"
 }
 
@@ -78,3 +74,23 @@ variable "private_subnet" {
   type        = string
   description = "The private IP space for the cluster"
 }
+
+variable "metal_lb_vip_subnet_size" {
+  type        = number
+  description = "The number of IPs to have for Load Balancer VIPs (2 are used for Control Plane and Ingress VIPs)"
+  validation {
+    condition     = var.metal_lb_vip_subnet_size > 1
+    error_message = "The minimum number of IPs is 2."
+  }
+}
+variable "gcp_project_id" {
+  type        = string
+  default     = "null"
+  description = "The project ID for GCP"
+}
+variable "gcp_zone" {
+  type        = string
+  default     = "us-central1-a"
+  description = "The GCE zone where the instances should reside"
+}
+
