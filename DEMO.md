@@ -10,6 +10,7 @@ cd terraform-gcpartner-anthos-baremetal
 terraform init -upgrade
 ```
 
+- do a gcloud init and set it up to connect your GCP project
 - Edit the terraform.tfvars file to have your API key and Project ID
 
 ```sh
