@@ -200,9 +200,3 @@ variable "metal_lb_vip_subnet_size" {
   description = "The number of IPs to have for Load Balancer VIPs (2 are used for Control Plane and Ingress VIPs)"
   default     = 8
 }
-variable "client_secret" {
-  type = string
-}
-variable "client_id" {
-  type = string
-}

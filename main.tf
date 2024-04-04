@@ -51,9 +51,7 @@ provider "google" {
 }
 
 provider "equinix" {
-  auth_token    = var.metal_auth_token
-  client_id     = var.client_id
-  client_secret = var.client_secret
+  auth_token = var.metal_auth_token
 }
 
 provider "pnap" {
@@ -136,7 +134,7 @@ locals {
   eqm_priv_vlan_id = var.cloud == "EQM" ? "not_implemented" : ""
   eqm_priv_subnet  = var.cloud == "EQM" ? "not_implemented" : ""
   eqm_pub_net_id   = var.cloud == "EQM" ? module.EQM_Infra.0.lb_vip_id : ""
-  eqm_pub_vlan_id  = var.cloud == "EQM" ? module.EQM_Infra.0.vlan_id : ""
+  eqm_pub_vlan_id  = var.cloud == "EQM" ? "not_implemented" : ""
   eqm_pub_subnet   = var.cloud == "EQM" ? module.EQM_Infra.0.lb_vip_subnet : ""
   eqm_os_image     = var.cloud == "EQM" ? module.EQM_Infra.0.os_image : ""
   eqm_project_id   = var.cloud == "EQM" ? module.EQM_Infra.0.project_id : ""
