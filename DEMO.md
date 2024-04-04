@@ -29,7 +29,7 @@ terraform plan
 terraform apply
 terraform output kubeconfig | grep -v EOT > ~/anthos.kubeconfig
 cd ~
-export KUBECONFIG=./anthos.kubeconfig
+export KUBECONFIG=~/anthos.kubeconfig
 ```
 
 - Install kubectl if you don't have it already
