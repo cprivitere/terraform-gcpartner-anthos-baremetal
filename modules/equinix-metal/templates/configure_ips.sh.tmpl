@@ -10,7 +10,7 @@ iface bond0.${vlan} inet static
     post-up route add -net ${gcp_private_access_cidr} gw ${gateway_ip}
 EOF
 
-ip route add ${machine_cidr}  via ${gateway_ip}
+ip route add ${machine_cidr} via ${gateway_ip}
 ip route add ${gcp_network_cidr} via ${gateway_ip}
 ip route add ${gcp_private_access_cidr} via ${gateway_ip}
 
@@ -18,3 +18,7 @@ cat <<EOF > /etc/systemd/resolved.conf
 [Resolve]
 DNS=${gcp_dns_forwarder_ip}
 EOF
+
+systemctl restart systemd-resolved
+
+systemctl restart networking

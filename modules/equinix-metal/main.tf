@@ -177,13 +177,19 @@ resource "equinix_metal_bgp_session" "enable_worker_bgp" {
   address_family = "ipv4"
 }
 
+# Capture approximate creation time for equinix_metal_reserved_ip_block.lb_vip_subnet
+# tags and store it in state so we don't update the subnet on every plan/apply
+resource "terraform_data" "timestamp" {
+  input = timestamp()
+}
+
 resource "equinix_metal_reserved_ip_block" "lb_vip_subnet" {
   project_id  = local.metal_project_id
   type        = "public_ipv4"
   metro       = var.metal_metro
   quantity    = var.metal_lb_vip_subnet_size
   description = "${var.cluster_name}: Load Balancer VIPs 01"
-  tags        = ["cluster:${var.cluster_name}", "created_by:terraform", "created_at:${timestamp()}"]
+  tags        = ["cluster:${var.cluster_name}", "created_by:terraform", "created_at:${terraform_data.timestamp.output}"]
 }
 
 # Create a new VLAN in metro "esv"
@@ -195,11 +201,11 @@ resource "equinix_metal_vlan" "vlan1" {
 }
 
 resource "equinix_metal_vrf" "example" {
-  description = "VRF with ASN 65000 and a pool of address space that includes 192.168.100.0/25"
+  description = "VRF with ASN 65000 and a pool of address space that includes ${var.private_subnet}"
   name        = "example-vrf"
   metro       = var.metal_metro
   local_asn   = "65000"
-  ip_ranges   = ["192.168.100.0/25"]
+  ip_ranges   = [var.private_subnet]
   project_id  = local.metal_project_id
 
   # Since we have to jam in the Google-provided IP range with a restapi resource,
@@ -209,13 +215,13 @@ resource "equinix_metal_vrf" "example" {
   }
 }
 resource "equinix_metal_reserved_ip_block" "example" {
-  description = "Reserved IP block (192.168.100.0/25) taken from on of the ranges in the VRF's pool of address space."
+  description = "Reserved IP block (${var.private_subnet}) taken from on of the ranges in the VRF's pool of address space."
   project_id  = local.metal_project_id
   metro       = var.metal_metro
   type        = "vrf"
   vrf_id      = equinix_metal_vrf.example.id
-  cidr        = 25
-  network     = "192.168.100.0"
+  cidr        = split("/", var.private_subnet)[1]
+  network     = cidrhost(var.private_subnet, 0)
 }
 
 resource "equinix_metal_gateway" "example" {
@@ -237,16 +243,24 @@ resource "equinix_metal_connection" "example" {
 }
 
 resource "restapi_object" "vrf_metal_to_gcp_ip_range" {
+  # NOTE: this resource will always show changes because
+  # the `data` input schema does not match the response
   path = "/vrfs/${equinix_metal_vrf.example.id}"
 
   create_method = "PUT"
 
+  # We have to create the VRF in order to create the Metal connection,
+  # and we have to create the Metal connection in order to set up GCP
+  # side of the interconnection, so we come back and add the GCP-provided
+  # IPs to the VRF separately after the connection is fully set up
   data = jsonencode({
     ip_ranges = setunion(equinix_metal_vrf.example.ip_ranges, ["${local.normalized_cidrhost}/29"])
   })
 }
 
 resource "restapi_object" "vrf_vc_bgp_peering" {
+  # NOTE: this resource will always show changes because
+  # the `data` input schema does not match the response
   depends_on = [restapi_object.vrf_metal_to_gcp_ip_range]
   # We made a non-redundant connection so we can assume there's one port with one VC
   path = "/virtual-circuits/${equinix_metal_connection.example.ports[0].virtual_circuit_ids[0]}"
@@ -257,13 +271,16 @@ resource "restapi_object" "vrf_vc_bgp_peering" {
   # terraform point-of-view
   create_method = "PUT"
 
-  # TODO
   data = jsonencode({
     customer_ip = local.google_side_ip
     metal_ip    = local.metal_side_ip
     peer_asn    = 16550
     subnet      = "${local.normalized_cidrhost}/30"
   })
+
+  lifecycle {
+    ignore_changes = [ data ]
+  }
 }
 
 resource "google_compute_network" "abm" {
@@ -317,7 +334,30 @@ resource "google_dns_policy" "inbound_dns" {
 }
 
 data "google_compute_addresses" "dns_query_forwarder" {
-  filter     = "name:dns-forwarding-*"
+  filter     = "(name:dns-forwarding-*) (subnetwork = \"${data.google_compute_subnetwork.abm.self_link}\")"
   region     = local.gcp_region
   depends_on = [google_dns_policy.inbound_dns]
+}
+
+resource "terraform_data" "wait_for_cloud_init" {
+  input = [
+    equinix_metal_port.cp_node_bond0,
+    equinix_metal_port.worker_node_bond0,
+  ]
+  connection {
+    type        = "ssh"
+    user        = "root"
+    host        = equinix_metal_device.cp_node[0].network[0].address
+    private_key = chomp(var.ssh_key.private_key)
+  }
+  provisioner "remote-exec" {
+    inline = [
+      "cloud-init status --wait"
+    ]
+  }
+}
+
+resource "terraform_data" "bastion_ip" {
+  depends_on = [ terraform_data.wait_for_cloud_init ]
+  input = equinix_metal_device.cp_node.0.access_public_ipv4
 }

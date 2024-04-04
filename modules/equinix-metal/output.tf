@@ -1,5 +1,5 @@
 output "bastion_ip" {
-  value       = equinix_metal_device.cp_node.0.access_public_ipv4
+  value       = terraform_data.bastion_ip.output
   description = "Bastion Host IP"
 }
 
