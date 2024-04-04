@@ -56,7 +56,11 @@ helm install ollama-webui ./open-webui-1.0.0.tgz --set webui.ingress.enabled=tru
 kubectl get ingress open-webui
 ```
 
-- Open a web browser and go to http://IPADDRESSFROMLASTSTEP
+- You may need to wait a while for the ingress to be ready, just wait until the Address field has an IP address in it.
+
+- Open a web browser and go to that IP address, using normal http (no https): http://IPADDRESSFROMLASTSTEP
+
+- It may say no route to upstream while the webui is starting up, just keep refreshing until it works
 
 - Go to settings->Connections edit the ollama url and remove the /api at the end
 
