@@ -1,6 +1,6 @@
-# Demo Steps
+# Demo Install Steps
 
-## Install git if you don't have it already
+- Install git if you don't have it already
 
 https://git-scm.com/book/en/v2/Getting-Started-Installing-Git
 
@@ -10,7 +10,7 @@ cd terraform-gcpartner-anthos-baremetal
 terraform init -upgrade
 ```
 
-## Edit the terraform.tfvars file to have your API key and Project ID
+- Edit the terraform.tfvars file to have your API key and Project ID
 
 ```sh
 terraform plan
@@ -20,11 +20,11 @@ cd ~
 export KUBECONFIG=./anthos.kubeconfig
 ```
 
-## Install kubectl if you don't have it already
+- Install kubectl if you don't have it already
 
 https://kubernetes.io/docs/tasks/tools/
 
-## Validate the cluster is working
+- Validate the cluster is working
 
 ```sh
 kubectl get nodes
@@ -32,7 +32,7 @@ kubectl get pods
 kubectl patch storageclass local-shared -p '{"metadata":{"annotations":{"storageclass.kubernetes.io/is-default-class": "true"}}}'
 ```
 
-## Install Helm if you don't have it already
+- Install Helm if you don't have it already
 
 https://helm.sh/docs/intro/install/
 
@@ -44,22 +44,22 @@ helm install ollama-webui ./open-webui-1.0.0.tgz --set webui.ingress.enabled=tru
 kubectl get ingress open-webui
 ```
 
-## Open a web browser and go to http://<the address in the output above>
+- Open a web browser and go to http://IPADDRESSFROMLASTSTEP
 
-## Go to settings->Connections edit the ollama url and remove the /api at the end
+- Go to settings->Connections edit the ollama url and remove the /api at the end
 
-## click the little reload button next to the ollama url
+- click the little reload button next to the ollama url
 
-## Wait for it to pop up that it connected to ollama
+- Wait for it to pop up that it connected to ollama
 
-## Now go to the Settings->Models
+- Now go to the Settings->Models
 
-## Type `gemma:2b` into the "Pull a model from Ollama.com" box and click the download button
+- Type `gemma:2b` into the "Pull a model from Ollama.com" box and click the download button
 
-## Wait for it to say the model has been successfully downloaded. This will take a while, even after it says 100%.
+- Wait for it to say the model has been successfully downloaded. This will take a while, even after it says 100%.
 
-## Close Settings
+- Close Settings
 
-## Choose gemma:2b from the models drop down
+- Choose gemma:2b from the models drop down
 
-## Type a prompt and see if it works
+- Type a prompt and see if it works
