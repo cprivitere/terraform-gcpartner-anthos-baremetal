@@ -1,5 +1,9 @@
 # Demo Install Steps
 
+- Install jq if you don't have it already
+
+https://jqlang.github.io/jq/download/
+
 - Install git if you don't have it already
 
 https://git-scm.com/book/en/v2/Getting-Started-Installing-Git
