@@ -6,7 +6,7 @@ create_project   = false
 # Only used if you're creating a new project
 organization_id  = "<YOUR EQUINIX METAL ORG ID>"
 # Only used if you're creating a new project, the name of the new project
-project_name     = "cprivitere-anthos-test"
+project_name     = "<YOUR DESIRED EQUINIX mETAL PROJECT NAME>"
 ansible_url      = "https://github.com/cprivitere/ansible-gcpartner-anthos-baremetal/archive/make-eqm-work.tar.gz"
 ansible_tar_ball = "make-eqm-work.tar.gz"
 gcp_zone          = "<YOUR GCP ZONE>"
