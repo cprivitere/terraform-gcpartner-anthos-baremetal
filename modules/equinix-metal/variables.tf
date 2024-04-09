@@ -83,11 +83,6 @@ variable "metal_lb_vip_subnet_size" {
     error_message = "The minimum number of IPs is 2."
   }
 }
-variable "gcp_project_id" {
-  type        = string
-  default     = "null"
-  description = "The project ID for GCP"
-}
 variable "gcp_zone" {
   type        = string
   default     = "us-central1-a"

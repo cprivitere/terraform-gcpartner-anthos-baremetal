@@ -37,14 +37,8 @@ terraform {
   }
 }
 
-locals {
-  gcp_zone_parts = split("-", var.gcp_zone)
-  gcp_region     = join("-", slice(local.gcp_zone_parts, 0, length(local.gcp_zone_parts) - 1))
-}
-
 provider "google" {
   project = var.gcp_project_id
-  region  = local.gcp_region
 }
 
 provider "equinix" {
@@ -118,7 +112,6 @@ module "EQM_Infra" {
   private_subnet           = var.private_subnet
   ssh_key                  = local.ssh_key
   metal_lb_vip_subnet_size = var.metal_lb_vip_subnet_size
-  gcp_project_id           = var.gcp_project_id
   gcp_zone                 = var.gcp_zone
 }
 
