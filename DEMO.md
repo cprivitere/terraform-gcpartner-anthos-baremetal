@@ -66,7 +66,7 @@ kubectl get ingress open-webui
 
 - It may say no route to upstream while the webui is starting up, just keep refreshing until it works
 
-- Go to settings->Connections edit the ollama url and remove the trailing `\` at the end
+- Go to settings->Connections edit the ollama url and remove the trailing `/` at the end
 
 - click the little reload button next to the ollama url
 
