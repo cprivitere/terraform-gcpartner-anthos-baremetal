@@ -112,7 +112,6 @@ module "EQM_Infra" {
   private_subnet           = var.private_subnet
   ssh_key                  = local.ssh_key
   metal_lb_vip_subnet_size = var.metal_lb_vip_subnet_size
-  gcp_zone                 = var.gcp_zone
 }
 
 locals {

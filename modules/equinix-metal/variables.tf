@@ -82,10 +82,4 @@ variable "metal_lb_vip_subnet_size" {
     condition     = var.metal_lb_vip_subnet_size > 1
     error_message = "The minimum number of IPs is 2."
   }
-}
-variable "gcp_zone" {
-  type        = string
-  default     = "us-central1-a"
-  description = "The GCE zone where the instances should reside"
-}
-
+} 
