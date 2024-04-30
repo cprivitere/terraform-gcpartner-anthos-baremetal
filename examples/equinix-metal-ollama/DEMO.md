@@ -9,7 +9,7 @@ https://jqlang.github.io/jq/download/
 https://git-scm.com/book/en/v2/Getting-Started-Installing-Git
 
 ```sh
-git clone https://github.com/cprivitere/terraform-gcpartner-anthos-baremetal
+git clone https://github.com/gcpartner/terraform-gcpartner-anthos-baremetal
 ```
 
 - Install Terraform if you don't have it already
